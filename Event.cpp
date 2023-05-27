@@ -5,6 +5,11 @@ Event::Event(){
     number = rand() % 1000000 + 1;
 }
 
+Event::Event(const Event &_event){
+    this->generation_date = _event.generation_date;
+    this->number = _event.number;
+}
+
 std::string Event::get_string_values() const{
     std::time_t time_t_generation_date = std::chrono::system_clock::to_time_t(generation_date);
     std::stringstream ss;

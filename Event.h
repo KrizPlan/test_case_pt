@@ -11,6 +11,7 @@ private:
     uint number;
 public:
     Event();
+    Event(const Event&);
     std::string get_string_values() const;
     uint get_number() const;
 };
