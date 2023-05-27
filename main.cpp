@@ -48,17 +48,29 @@ int main(){
     std::queue<Event> event_queue;
     std::list<uint> finded_prime_numbers_list;
 
-    uint number_of_generation_threads = 2;
-    uint number_of_generations_in_each_thread = 10000;
-    uint number_of_handler_threads = 10;
+    uint number_of_generation_threads;
+    uint number_of_generations_in_each_thread;
+    uint number_of_handler_threads;
+
+    std::cout<<"Enter number of generation threads"<<std::endl;
+    std::cin>>number_of_generation_threads;
+
+    std::cout<<"Enter number of generations in each thread"<<std::endl;
+    std::cin>>number_of_generations_in_each_thread;
+
+    std::cout<<"Enter number of handler threads"<<std::endl;
+    std::cin>>number_of_handler_threads;
 
 
     std::vector<std::thread> generation_threads_vector;
     std::vector<std::thread> handler_threads_vector;
 
+    // create vector of generation threads
     for(size_t i = 0; i < number_of_generation_threads; i++){
+        // push lambda function
         generation_threads_vector.push_back(std::thread([&event_queue](const uint number_of_generations){
                 for(size_t i = 0; i < number_of_generations && running; i++){
+                // if push in full vector then throw exception
                 try
                 {
                     mutex_for_event_queue.lock();
@@ -71,15 +83,19 @@ int main(){
                     std::cerr << e.what() << '\n';
                 }
             } // for in labda function
-            }, number_of_generations_in_each_thread) // thread
+            }, // lambda
+            number_of_generations_in_each_thread) // param in lambda function
         ); // push_back
     } // main for
 
+    // create vector of handler threads
     for(size_t i = 0; i < number_of_handler_threads; i++){
+        // push lambda function
         handler_threads_vector.push_back(
             std::thread([&event_queue, &finded_prime_numbers_list](){
             Event event_to_handle;
             while(running){
+                // check queue is empty and if yes wait 100 ms and check again
                 mutex_for_event_queue.lock();
                 if(event_queue.size() == 0){
                     mutex_for_event_queue.unlock();
@@ -102,7 +118,9 @@ int main(){
                     mutex_for_event_queue.unlock();
                 }
 
+                // check received event number is prime and if yes then add number in list
                 if(numberIsPrime(event_to_handle.get_number())){
+                    // if list is full then throw exception
                     try
                     {
                         mutex_for_finded_prime_numbers_list.lock();
@@ -114,8 +132,6 @@ int main(){
                         mutex_for_finded_prime_numbers_list.unlock();
                         std::cerr << e.what() << '\n';
                     }
-                    
-                    
                 }
             }; // while
         }) // thread
