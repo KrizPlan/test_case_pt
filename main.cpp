@@ -17,6 +17,8 @@ std::mutex mutex_for_event_queue;
 
 std::mutex mutex_for_finded_prime_numbers_list;
 
+std::mutex mutex_for_cout;
+
 
 /// @brief Handler for SIGINT to stop program
 /// @param signal received signal
@@ -41,9 +43,18 @@ bool numberIsPrime(uint number){
 }
 
 
-int main(){
+int main(int argc, char *argv[]){
     srand((unsigned)time(NULL));
     signal(SIGINT, SIGINTHandler);
+
+    int optarg_result = 0;
+    bool debug = false;
+
+    while ( (optarg_result = getopt(argc, argv, "d")) != -1){
+		switch (optarg_result) {
+		case 'd': {std::cout<<"Debug mode"<<std::endl; debug = true; break;}
+		} // switch
+	} // while
     
     std::queue<Event> event_queue;
     std::list<uint> finded_prime_numbers_list;
@@ -68,13 +79,19 @@ int main(){
     // create vector of generation threads
     for(size_t i = 0; i < number_of_generation_threads; i++){
         // push lambda function
-        generation_threads_vector.push_back(std::thread([&event_queue](const uint number_of_generations){
+        generation_threads_vector.push_back(std::thread([&event_queue](const uint number_of_generations, const bool debug){
                 for(size_t i = 0; i < number_of_generations && running; i++){
                 // if push in full vector then throw exception
                 try
                 {
+                    Event event_to_queue;
+                    if(debug){
+                        mutex_for_cout.lock();
+                        std::cout<<"Generation thread: "<<std::this_thread::get_id()<<" "<<event_to_queue.get_string_values()<<std::endl;
+                        mutex_for_cout.unlock();
+                    }
                     mutex_for_event_queue.lock();
-                    event_queue.push(Event());
+                    event_queue.push(event_to_queue);
                     mutex_for_event_queue.unlock();
                 }
                 catch(const std::exception& e)
@@ -84,7 +101,7 @@ int main(){
                 }
             } // for in labda function
             }, // lambda
-            number_of_generations_in_each_thread) // param in lambda function
+            number_of_generations_in_each_thread, debug) // param in lambda function
         ); // push_back
     } // main for
 
@@ -92,7 +109,7 @@ int main(){
     for(size_t i = 0; i < number_of_handler_threads; i++){
         // push lambda function
         handler_threads_vector.push_back(
-            std::thread([&event_queue, &finded_prime_numbers_list](){
+            std::thread([&event_queue, &finded_prime_numbers_list](const bool debug){
             Event event_to_handle;
             while(running){
                 // check queue is empty and if yes wait 100 ms and check again
@@ -118,6 +135,12 @@ int main(){
                     mutex_for_event_queue.unlock();
                 }
 
+                if(debug){
+                        mutex_for_cout.lock();
+                        std::cout<<"Handler thread: "<<std::this_thread::get_id()<<" "<<event_to_handle.get_string_values()<<std::endl;
+                        mutex_for_cout.unlock();
+                }
+
                 // check received event number is prime and if yes then add number in list
                 if(numberIsPrime(event_to_handle.get_number())){
                     // if list is full then throw exception
@@ -134,7 +157,7 @@ int main(){
                     }
                 }
             }; // while
-        }) // thread
+        }, debug) // thread
         ); // push_back
     } // main for
 
