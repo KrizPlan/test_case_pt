@@ -11,3 +11,7 @@ std::string Event::get_string_values() const{
     ss << std::put_time(std::localtime(&time_t_generation_date), "%Y-%m-%d %X");
     return std::string("Number: " + std::to_string(number) + " date: " + ss.str());
 }
+
+uint Event::get_number() const{
+    return number;
+}

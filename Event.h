@@ -12,4 +12,5 @@ private:
 public:
     Event();
     std::string get_string_values() const;
+    uint get_number() const;
 };
