@@ -3,9 +3,11 @@ Exercise C-2 solution.
 
 ## Depends
 Required packeges:
+```
 g++
 make
 cmake
+```
 
 ## Build programm
 To build this program run commands:
