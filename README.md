@@ -1,5 +1,5 @@
 # test_case_pt
-Exercise C-2 solution.
+Exercise C-2 solution. Project wotk on unix system.
 
 ## Depends
 Required packeges:
