@@ -3,11 +3,14 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <iomanip>
+
+#include "Event.h"
 
 /// @brief check number is primal
 /// @param number nimber to check
 /// @return true if number is prime or false if number is not prime
-bool number_is_prime(uint number){
+bool numberIsPrime(uint number){
     // set variable to true as default and change value if find divider
     bool is_prime = true;
     for(size_t i = 2; i < number; i++){
@@ -21,12 +24,10 @@ bool number_is_prime(uint number){
 
 
 int main(){
-    uint number;
-    do
-    {
-        std::cin>>number;
-        std::cout<<"Result: "<<number_is_prime(number)<<std::endl;
-    } while (number != 0);
+    Event evn;
+
     
-    std::cout<<"Hello world!"<<std::endl;
+
+    
+    std::cout<<evn.get_string_values()<<std::endl;
 }
